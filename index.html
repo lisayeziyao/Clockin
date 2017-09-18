@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h3>Login</h3>
+
+<input type="text" id="myUsername" value="Username">
+<input type="text" id="myPassword" value="Password">
+<!-- 
+<p>Click the "Try it" button to get the text in the text field.</p> -->
+
+<button onclick="login()">Login</button>
+
+<p id="demo"></p>
+
+<script>
+function login() {
+    var inputUsername = document.getElementById("myUsername").value;
+    var inputPassword = document.getElementById("myPassword").value;
+	readTextFile("file:///h/u8/g5/00/yeziyao/Desktop/timer/database.txt");
+}
+
+function readTextFile(file)
+{
+    var rawFile = new XMLHttpRequest();
+    rawFile.open("GET", file, true);
+    rawFile.onreadystatechange = function ()
+    {
+        if(rawFile.readyState === 4)
+        {
+            if(rawFile.status === 200 || rawFile.status == 0)
+            {
+                var allText = rawFile.responseText;
+                document.getElementById("demo").innerHTML = allText;
+                alert(allText);
+                /*return allText.toString();*/
+            }
+        }
+    }
+    rawFile.send(null);
+   
+    
+
+}
+
+/*And specify file:// in your filename:
+
+readTextFile("file:///C:/your/path/to/file.txt");*/
+</script>
+
+</body>
+</html>
