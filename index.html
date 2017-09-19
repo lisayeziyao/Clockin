@@ -1,51 +1,104 @@
 <!DOCTYPE html>
 <html>
+<head><meta charset="utf-8"/></head>
 <body>
 
-<h3>Login</h3>
+<h3>Clockin</h3>
 
 <input type="text" id="myUsername" value="Username">
-<input type="text" id="myPassword" value="Password">
+<select id="timeslot">
+    <option value="m">Morning</option>
+    <option value="n">Night</option>
+</select>
 <!-- 
 <p>Click the "Try it" button to get the text in the text field.</p> -->
 
-<button onclick="login()">Login</button>
+<button onclick="clockin()">Clockin</button>
 
 <p id="demo"></p>
 
+<img src="./cover.jpg">
+
 <script>
-function login() {
+function clockin() {
+    
     var inputUsername = document.getElementById("myUsername").value;
-    var inputPassword = document.getElementById("myPassword").value;
-	readTextFile("file:///h/u8/g5/00/yeziyao/Desktop/timer/database.txt");
+    var timeSlot = document.getElementById("timeslot").value;
+    var currentHour = new Date().getHours();
+    var currentMin = new Date().getMinutes();
+	readTextFile("file:///home/ziyao/Documents/Clockin/Clockin_web/Clockin/cd.xml", inputUsername, timeSlot);
 }
 
-function readTextFile(file)
-{
-    var rawFile = new XMLHttpRequest();
-    rawFile.open("GET", file, true);
-    rawFile.onreadystatechange = function ()
-    {
-        if(rawFile.readyState === 4)
-        {
-            if(rawFile.status === 200 || rawFile.status == 0)
-            {
-                var allText = rawFile.responseText;
-                document.getElementById("demo").innerHTML = allText;
-                alert(allText);
-                /*return allText.toString();*/
-            }
+
+function readTextFile(file, user, slot) {
+  var xmlhttp = new XMLHttpRequest();
+  xmlhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      parseXML(this, user, slot);
+    }
+  };
+  xmlhttp.open("GET", file, true);
+  xmlhttp.send();
+}
+
+function parseXML(xml, user, slot) {
+  var x, i, xmlDoc,txt;
+  xmlDoc = xml.responseXML;
+
+  txt = "";
+  copy = "<?xml version='1.0' encoding='UTF-8'?><CATALOG>";
+  x = xmlDoc.getElementsByTagName("NAME");
+  y = xmlDoc.getElementsByTagName("ACCOUNT");
+  for (i = 0; i< x.length; i++) {
+
+    if (x[i].childNodes[0].nodeValue === user) {
+        if (slot === "m" && parseInt(new Date().getHours()) > 7) {
+            y[i].childNodes[0].nodeValue = String(parseInt(y[i].childNodes[0].nodeValue) + 2);
+        }
+
+        if (slot === "n" && parseInt(new Date().getHours()) > 11) {
+            y[i].childNodes[0].nodeValue = String(parseInt(y[i].childNodes[0].nodeValue) + 2);
         }
     }
-    rawFile.send(null);
-   
-    
 
+    txt += x[i].childNodes[0].nodeValue 
+            + ",    Penalty :  "
+            + y[i].childNodes[0].nodeValue + "<br>   ";
+    copy += "<USER><NAME>" + x[i].childNodes[0].nodeValue + "</NAME><ACCOUNT>" 
+            + String(y[i].childNodes[0].nodeValue) + "</ACCOUNT></USER>"
+  }
+  copy += "</CATALOG>";
+  saveTextAsFile(copy);
+  document.getElementById("demo").innerHTML = txt;
 }
 
-/*And specify file:// in your filename:
 
-readTextFile("file:///C:/your/path/to/file.txt");*/
+function saveTextAsFile(fileStr)
+{
+    var textToWrite = fileStr;
+    var textFileAsBlob = new Blob([textToWrite], {type:'text/xml'});
+    var fileNameToSaveAs = "file:///home/ziyao/Documents/Clockin/Clockin_web/Clockin/cd.xml";
+      var downloadLink = document.createElement("a");
+    downloadLink.download = fileNameToSaveAs;
+    downloadLink.innerHTML = "Download File";
+    if (window.webkitURL != null)
+    {
+        // Chrome allows the link to be clicked
+        // without actually adding it to the DOM.
+        downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
+    }
+    else
+    {
+        // Firefox requires the link to be added to the DOM
+        // before it can be clicked.
+        downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
+       // downloadLink.onclick = destroyClickedElement;
+        downloadLink.style.display = "none";
+        document.body.appendChild(downloadLink);
+    }
+
+    downloadLink.click();
+}
 </script>
 
 </body>
