@@ -1,4 +1,0 @@
-User: login, signout, checkout, set_goal, change_goal, set_vacation, change_vacation, delete_vacation
-
-Admin: view_money, modify_money
-
